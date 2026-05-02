@@ -1,0 +1,237 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TITLE -->
+    <mxCell id="title" value="BPM — Proceso de Manufactura Boeing 737 MAX con Control IoT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a237e;" vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="1250" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- SWIM LANE LABELS -->
+    <mxCell id="lane_op" value="Operario de Línea" style="text;html=1;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;rotation=-90;" vertex="1" parent="1">
+      <mxGeometry x="20" y="120" width="160" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="lane_iot" value="Sensores IoT / Edge" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;rotation=-90;" vertex="1" parent="1">
+      <mxGeometry x="20" y="290" width="160" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="lane_data" value="Data Office / Analytics" style="text;html=1;strokeColor=none;fillColor=#ffe6cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;rotation=-90;" vertex="1" parent="1">
+      <mxGeometry x="20" y="460" width="160" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="lane_reg" value="Reguladores (FAA/EASA)" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;rotation=-90;" vertex="1" parent="1">
+      <mxGeometry x="20" y="630" width="160" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- SWIM LANE BACKGROUNDS -->
+    <mxCell id="bg_op" value="" style="swimlane;startSize=0;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=30;" vertex="1" parent="1">
+      <mxGeometry x="100" y="100" width="1450" height="180" as="geometry" />
+    </mxCell>
+    <mxCell id="bg_iot" value="" style="swimlane;startSize=0;fillColor=#d5e8d4;strokeColor=#82b366;opacity=30;" vertex="1" parent="1">
+      <mxGeometry x="100" y="280" width="1450" height="180" as="geometry" />
+    </mxCell>
+    <mxCell id="bg_data" value="" style="swimlane;startSize=0;fillColor=#ffe6cc;strokeColor=#d6b656;opacity=30;" vertex="1" parent="1">
+      <mxGeometry x="100" y="460" width="1450" height="180" as="geometry" />
+    </mxCell>
+    <mxCell id="bg_reg" value="" style="swimlane;startSize=0;fillColor=#f8cecc;strokeColor=#b85450;opacity=30;" vertex="1" parent="1">
+      <mxGeometry x="100" y="640" width="1450" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- ============ ROW 1: OPERARIO ============ -->
+
+    <!-- START EVENT -->
+    <mxCell id="start" value="Inicio&#xa;Orden de&#xa;Producción" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="130" y="150" width="80" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- T1: Recepción y verificación de materiales -->
+    <mxCell id="t1" value="Recepción y&#xa;Verificación&#xa;de Materiales" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="155" width="120" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- T2: Preparación de herramientas IoT -->
+    <mxCell id="t2" value="Preparación de&#xa;Herramientas&#xa;IoT Conectadas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="420" y="155" width="120" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- T3: Ensamblaje Fuselaje (AR guiado) -->
+    <mxCell id="t3" value="Ensamblaje&#xa;Fuselaje&#xa;(Guía AR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="590" y="155" width="120" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- T4: Torque y fijación -->
+    <mxCell id="t4" value="Torque y&#xa;Fijación de&#xa;Componentes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="760" y="155" width="120" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- GW1: ¿Torque OK? -->
+    <mxCell id="gw1" value="¿Torque&#xa;correcto?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="920" y="145" width="110" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- T5: Corrección de torque -->
+    <mxCell id="t5_fix" value="Corrección&#xa;de Torque&#xa;(Alerta Andon)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="920" y="60" width="110" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- T6: Inspección visual CV -->
+    <mxCell id="t6" value="Inspección&#xa;Visual&#xa;(Escáner 3D)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="155" width="120" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- GW2: ¿Defecto detectado? -->
+    <mxCell id="gw2" value="¿Defecto&#xa;detectado?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1245" y="145" width="110" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- T7: Reproceso / Retrabajo -->
+    <mxCell id="t7_fix" value="Retrabajo /&#xa;Reproceso&#xa;Controlado" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1245" y="60" width="110" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- END: Aeronave lista -->
+    <mxCell id="end" value="Aeronave&#xa;Lista para&#xa;Entrega" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1410" y="150" width="90" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ============ ROW 2: IoT SENSORS ============ -->
+
+    <!-- S1: Sensor verificación materiales -->
+    <mxCell id="s1" value="Sensor RFID:&#xa;Verificación&#xa;de Lotes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="320" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- S2: Sensor herramientas -->
+    <mxCell id="s2" value="Calibración&#xa;Automática&#xa;de Herramientas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="420" y="320" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- S3: AR overlay -->
+    <mxCell id="s3" value="AR: Secuencia&#xa;y Torque&#xa;Visualizados" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="590" y="320" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- S4: Llave torque IoT -->
+    <mxCell id="s4" value="Llave Torque&#xa;Conectada:&#xa;Registro Auto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="760" y="320" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- S5: Poka-Yoke visión -->
+    <mxCell id="s5" value="Visión Comp.&#xa;Poka-Yoke:&#xa;Detección Defectos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="320" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ============ ROW 3: DATA OFFICE ============ -->
+
+    <!-- D1: Data Lake ingesta -->
+    <mxCell id="d1" value="Data Lake:&#xa;Ingesta en&#xa;Tiempo Real" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="590" y="490" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- D2: Analítica predictiva -->
+    <mxCell id="d2" value="Analítica&#xa;Predictiva&#xa;(Python/ML)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="760" y="490" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- D3: Dashboard KPIs -->
+    <mxCell id="d3" value="Dashboard&#xa;Calidad (KPIs&#xa;Tiempo Real)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="920" y="490" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- D4: Digital Twin -->
+    <mxCell id="d4" value="Gemelo Digital&#xa;Actualización&#xa;Continua" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="490" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- D5: Trazabilidad inmutable -->
+    <mxCell id="d5" value="Trazabilidad&#xa;Inmutable&#xa;(Registro Audit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1245" y="490" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ============ ROW 4: REGULADORES ============ -->
+
+    <!-- R1: Portal regulatorio -->
+    <mxCell id="r1" value="Portal FAA/EASA:&#xa;Verificación&#xa;en Tiempo Real" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1245" y="665" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- R2: Auditoría aprobada -->
+    <mxCell id="r2" value="Auditoría&#xa;Aprobada&#xa;sin Observaciones" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1410" y="665" width="120" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ============ ARROWS — OPERARIO ROW ============ -->
+    <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="start" target="t1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t1" target="t2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t2" target="t3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t3" target="t4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t4" target="gw1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a6" value="No" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontStyle=1;fontColor=#b85450;" edge="1" source="gw1" target="t5_fix" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a6b" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="t5_fix" target="gw1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="1080" y="95"/><mxPoint x="1080" y="190"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="a7" value="Sí" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;fontStyle=1;fontColor=#82b366;" edge="1" source="gw1" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t6" target="gw2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a9" value="Sí" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontStyle=1;fontColor=#b85450;" edge="1" source="gw2" target="t7_fix" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a9b" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" source="t7_fix" target="t6" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="1200" y="95"/><mxPoint x="1200" y="190"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="a10" value="No" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;fontStyle=1;fontColor=#82b366;" edge="1" source="gw2" target="end" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ============ ARROWS — IoT TO OPERARIO ============ -->
+    <mxCell id="b1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;dashed=1;" edge="1" source="s1" target="t1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;dashed=1;" edge="1" source="s2" target="t2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;dashed=1;" edge="1" source="s3" target="t3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b4" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;dashed=1;" edge="1" source="s4" target="t4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;dashed=1;" edge="1" source="s5" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ============ ARROWS — IoT TO DATA LAKE ============ -->
+    <mxCell id="c1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;dashed=1;" edge="1" source="s3" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="c2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;dashed=1;" edge="1" source="s4" target="d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="c3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="d1" target="d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="c4" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="d2" target="d3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="c5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="d3" target="d4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="c6" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="d4" target="d5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ============ ARROWS — DATA TO REGULADORES ============ -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;dashed=1;" edge="1" source="d5" target="r1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;" edge="1" source="r1" target="r2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ============ LEGEND ============ -->
+    <mxCell id="leg_title" value="Leyenda" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="130" y="825" width="100" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg1" value="" style="endArrow=block;strokeColor=#333333;fillColor=#333333;" edge="1" parent="1">
+      <mxGeometry x="130" y="855" width="60" height="10" as="geometry"><Array as="points"><mxPoint x="190" y="855"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg1t" value="Flujo principal de proceso" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="200" y="847" width="180" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2" value="" style="endArrow=block;strokeColor=#82b366;dashed=1;" edge="1" parent="1">
+      <mxGeometry x="400" y="855" width="60" height="10" as="geometry"><Array as="points"><mxPoint x="460" y="855"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg2t" value="Señal IoT → Control operario" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="470" y="847" width="200" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3" value="" style="endArrow=block;strokeColor=#d6b656;dashed=1;" edge="1" parent="1">
+      <mxGeometry x="690" y="855" width="60" height="10" as="geometry"><Array as="points"><mxPoint x="750" y="855"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg3t" value="Datos → Data Lake" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="760" y="847" width="180" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4" value="" style="endArrow=block;strokeColor=#b85450;dashed=1;" edge="1" parent="1">
+      <mxGeometry x="960" y="855" width="60" height="10" as="geometry"><Array as="points"><mxPoint x="1020" y="855"/></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg4t" value="Trazabilidad → Reguladores" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="847" width="200" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg_rojo" value="Retrabajo / Corrección" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1250" y="840" width="130" height="30" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
