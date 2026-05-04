@@ -80,6 +80,7 @@ Mandos medios acostumbrados a controles manuales y reportes en papel pueden resi
 
 **Plan de gestión:** Programa de **embajadores digitales** por planta. Gamificación de los reportes IoT. Rediseño del esquema de bonos para premiar **cero defectos** en lugar de velocidad de producción.
 
+Además, la estrategia contempla un modelo de gobernanza de datos progresiva. Esto implica que la información recolectada por los sensores IoT no solo servirá para el control inmediato, sino que alimentará un ciclo de retroalimentación hacia ingeniería de diseño. Al tratar cada dato de ensamblaje como un activo crítico, se mitiga el riesgo de 'datos oscuros' (información recolectada pero no utilizada), asegurando que la inversión en infraestructura tecnológica se traduzca directamente en una mejora continua del diseño del producto y no solo de su fabricación.
 ---
 
 ## 4. Roadmap de Transformación (12 Meses)
@@ -111,3 +112,6 @@ Mandos medios acostumbrados a controles manuales y reportes en papel pueden resi
 - Data Lake en la nube para trazabilidad inmutable y análisis predictivo
 - Middleware industrial para interoperabilidad con sistemas heredados
 - Python (SciPy) para modelado estadístico de variables de sensores y predicción de fallos
+
+El uso de *Python (SciPy)* para el modelado estadístico permite trascender los límites de la supervisión humana tradicional. Al aplicar distribuciones normales para analizar las variables de torque y tensión en tiempo real, el sistema puede identificar tendencias de falla antes de que el defecto ocurra físicamente. 
+Esta capacidad de *mantenimiento predictivo de calidad* dota a Boeing de una infraestructura de datos resiliente, alineada con los estándares de la industria 4.0 y preparada para futuras integraciones de inteligencia artificial avanzada.
