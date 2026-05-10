@@ -1,7 +1,6 @@
 # BoeIoT
 
 **BoeIoT** is an end-to-end IoT analytics solution designed to predict component failures and flight anomalies. By leveraging real-time sensor data and a Medallion data architecture, it enables proactive maintenance, reducing downtime and enhancing flight safety.
-
 The platform utilizes a **Lakehouse** pattern deployed on AWS, facilitating both high-volume batch processing and low-latency event handling.
 
 ---
@@ -65,8 +64,5 @@ uv run src/scripts/ingest_bronze.py
 # 2. Clean and consolidate data into the Silver layer
 uv run src/scripts/bronze_to_silver_etl.py
 ```
-
----
-This is a polished version of your **README.md**. I’ve refined the hierarchy, improved the clarity of the architecture explanation, and streamlined the setup instructions to make them more professional and developer-friendly.
 
 ---
