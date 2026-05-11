@@ -223,3 +223,6 @@ __marimo__/
 *.tfstate.backup
 *tfvars
 .terraform.tfstate.lock.info
+
+# Claude context/settings
+.claude/
