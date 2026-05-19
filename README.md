@@ -63,16 +63,6 @@ uv run src/scripts/ingest_bronze.py
 
 # 2. Clean and consolidate data into the Silver layer
 uv run src/scripts/bronze_to_silver_etl.py
-
-# 3. Aggregate per-flight KPIs into the Gold layer
-uv run src/scripts/silver_to_gold_etl.py
 ```
-
-### 4. Open the Maintenance Dashboard
-Once Gold is populated, open the Jupyter dashboard for maintenance engineers:
-```bash
-uv run jupyter notebook src/notebooks/dashboard_maintenance.ipynb
-```
-The dashboard consumes `flight_summary.parquet` from the Gold layer. See [docs/gold_to_dashboard.md](docs/gold_to_dashboard.md) for the Gold schema and the mapping between each KPI and each visualization.
 
 ---
