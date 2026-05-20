@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoeIoT · Dashboards</title>
+<style>
+  :root {
+    --bg:#0b1220; --panel:#111a2e; --text:#e6edf3; --muted:#94a3b8;
+    --accent:#38bdf8; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --grid:#1e293b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:60px 24px}
+  header{border-bottom:1px solid var(--grid);padding-bottom:22px;margin-bottom:36px}
+  h1{font-size:32px;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:24px}
+  .card{
+    background:var(--panel);border:1px solid var(--grid);border-radius:14px;
+    padding:24px;text-decoration:none;color:inherit;display:block;
+    transition:border-color .15s,transform .15s;
+  }
+  .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;
+    font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+  .b-bronze{background:rgba(217,119,6,.16);color:#f59e0b;border:1px solid rgba(217,119,6,.4)}
+  .b-silver{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(148,163,184,.4)}
+  .b-gold  {background:rgba(250,204,21,.16);color:#fde047;border:1px solid rgba(250,204,21,.4)}
+  .card h2{margin:0 0 8px;font-size:20px}
+  .card p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+  .meta{margin-top:14px;display:flex;gap:14px;font-size:12px;color:var(--muted)}
+  .meta b{color:var(--text);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>BoeIoT · Medallion Dashboards</h1>
+    <p class="sub">Boeing 737 MAX maintenance intelligence · una vista por capa del data lake</p>
+  </header>
+  <div class="grid">
+    <a class="card" href="bronze.html">
+      <span class="badge b-bronze">Bronze Layer</span>
+      <h2>Raw Telemetry Ingest</h2>
+      <p>Estado crudo: 50 vuelos del subset NGAFID, 23 sensores en float16, nulos sistémicos del bus, violaciones físicas. Lo que llega antes de tocarlo.</p>
+      <div class="meta"><span><b>50</b> flights</span><span><b>23</b> sensors</span><span><b>2.9 GB</b> pickle</span></div>
+    </a>
+    <a class="card" href="silver.html">
+      <span class="badge b-silver">Silver Layer</span>
+      <h2>Cleaned & Normalized</h2>
+      <p>ETL EDA-guided: clip físico, ffill/bfill por vuelo, colapso CHT/EGT/FQty, fase de vuelo derivada, MinMax a [0,1]. Listo para modelado.</p>
+      <div class="meta"><span><b>43</b> flights</span><span><b>232K</b> rows</span><span><b>29</b> columns</span></div>
+    </a>
+    <a class="card" href="gold.html">
+      <span class="badge b-gold">Gold Layer</span>
+      <h2>Maintenance Intelligence</h2>
+      <p>35 KPIs agregados por vuelo: engine_health_score, eventos de anomalía, desbalances, riesgo de lubricación, drill-down temporal del peor vuelo.</p>
+      <div class="meta"><span><b>43</b> flights</span><span><b>35</b> KPIs</span><span><b>45,483</b> anomalies</span></div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
