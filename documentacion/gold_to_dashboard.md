@@ -138,7 +138,7 @@ El script ejecutor es [`src/scripts/silver_to_gold_etl.py`](../src/scripts/silve
 
 ## 4. Mapping Gold → Dashboard
 
-El dashboard ([`src/notebooks/dashboard_maintenance.ipynb`](../src/notebooks/dashboard_maintenance.ipynb)) consume `flight_summary.parquet` directamente. Cada sección depende de un subconjunto específico de columnas:
+El dashboard ([`src/notebooks/dashboard_maintenance.ipynb`](../notebooks/dashboard_maintenance.ipynb)) consume `flight_summary.parquet` directamente. Cada sección depende de un subconjunto específico de columnas:
 
 | # | Sección del dashboard | Columnas Gold consumidas | Pregunta que responde |
 |---|----------------------|--------------------------|-----------------------|
@@ -205,7 +205,7 @@ Donde:
 
 ### Agregar una nueva visualización al dashboard
 
-1. En [`dashboard_maintenance.ipynb`](../src/notebooks/dashboard_maintenance.ipynb), añadir dos celdas al final (markdown con título/descripción + código con la visualización).
+1. En [`dashboard_maintenance.ipynb`](../notebooks/dashboard_maintenance.ipynb), añadir dos celdas al final (markdown con título/descripción + código con la visualización).
 2. Documentar la nueva sección en la sección 4 de este MD.
 
 ### Cambiar umbrales de anomalía

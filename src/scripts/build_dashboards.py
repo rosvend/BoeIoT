@@ -1,6 +1,6 @@
 """Build standalone Plotly HTML dashboards — one per medallion layer.
 
-Generates ``docs/dashboards/{bronze,silver,gold}.html``. Each file is fully
+Generates ``dashboard/{bronze,silver,gold}.html``. Each file is fully
 self-contained (Plotly.js inlined), dark-themed, and matches the visual
 language of the live CloudFront dashboard.
 
@@ -24,7 +24,7 @@ from plotly.subplots import make_subplots
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_DIR = PROJECT_ROOT / "src" / "scripts"
 DATA_DIR = PROJECT_ROOT / "data"
-OUT_DIR = PROJECT_ROOT / "docs" / "dashboards"
+OUT_DIR = PROJECT_ROOT / "dashboard"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 if str(SCRIPTS_DIR) not in sys.path:

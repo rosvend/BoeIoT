@@ -7,7 +7,7 @@ The platform utilizes a **Lakehouse** pattern deployed on AWS, facilitating both
 
 ## Data architecture
 
-![Data architecture](docs/DOS%20-%20AWS%20Data%20architecture.jpg)
+![Data architecture](img/DOS%20-%20AWS%20Data%20architecture.jpg)
 
 ### The Medallion Approach
 
@@ -71,8 +71,8 @@ uv run src/scripts/silver_to_gold_etl.py
 ### 4. Maintenance dashboard
 The Jupyter dashboard reads the Gold layer with a three-stage fallback (S3 → `data/gold/` local cache → inline compute from Silver), so it runs even with LocalStack down:
 ```bash
-uv run jupyter notebook src/notebooks/dashboard_maintenance.ipynb
+uv run jupyter notebook notebooks/dashboard_maintenance.ipynb
 ```
-Schema, KPI definitions and the engine health score formula are documented in [`docs/gold_to_dashboard.md`](docs/gold_to_dashboard.md).
+Schema, KPI definitions and the engine health score formula are documented in [`documentacion/gold_to_dashboard.md`](documentacion/gold_to_dashboard.md).
 
 ---
