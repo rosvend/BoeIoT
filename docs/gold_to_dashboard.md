@@ -110,7 +110,7 @@ Cada flag es una comparación fila-a-fila contra un percentil global calculado s
 
 ## 3. Pipeline Silver → Gold
 
-```
+```text
 flight_data_silver.parquet  (millones de filas, 1 fila = 1 segundo de vuelo)
             │
             ▼
@@ -173,7 +173,7 @@ Se usa una estrategia de **percentiles sobre todo el dataset Silver**, en lugar 
 
 ### Fórmula del engine_health_score
 
-```
+```text
 score = 100 × [
     0.30 × (1 − anom_norm)         # menos anomalías = mejor
   + 0.25 × (1 − spread_avg)         # menos desbalance de cilindros = mejor
@@ -210,7 +210,7 @@ Donde:
 
 ### Cambiar umbrales de anomalía
 
-Editar los percentiles en [`src/scripts/silver_to_gold_etl.py`](../src/scripts/silver_to_gold_etl.py) (bloque "THRESHOLDS"). Más restrictivos (p99/p01) → menos eventos detectados; más laxos (p90/p10) → más eventos detectados.
+Editar los percentiles calculados al inicio de `compute_gold()` en [`src/scripts/silver_to_gold_etl.py`](../src/scripts/silver_to_gold_etl.py) (`cht_p95`, `egt_p95`, `oilp_p05`, `oilt_p95`). Más restrictivos (p99/p01) → menos eventos detectados; más laxos (p90/p10) → más eventos detectados.
 
 ---
 
@@ -221,4 +221,4 @@ Editar los percentiles en [`src/scripts/silver_to_gold_etl.py`](../src/scripts/s
 - **Sin ML:** los conteos de anomalías son reglas basadas en percentiles. No hay modelos predictivos (clasificación de falla, RUL, etc.).
 - **Health score es heurístico:** los pesos del score fueron elegidos a criterio de ingeniería, no calibrados contra datos reales de fallo. Requiere validación con casos históricos cuando estén disponibles.
 - **Escalas normalizadas:** las métricas no están en unidades físicas. Para reporting absoluto se necesitaría persistir y revertir el `MinMaxScaler` o mantener una copia no normalizada en Silver.
-- **Asume orden cronológico de filas:** el cálculo de `fuel_consumed` (primer registro menos último) asume que las filas dentro de cada `flight_id` están ordenadas en el tiempo. El pickle de origen cumple esto, pero un re-orden accidental rompería la métrica.
+- **Orden cronológico de filas:** el cálculo de `fuel_consumed` (primer registro menos último) depende de que las filas dentro de cada `flight_id` estén en orden cronológico. `compute_gold()` ordena por `seq_idx` cuando esa columna está presente (caso normal, lo materializa `ingest_bronze.py`); si no lo está, queda como fallback el orden original del DataFrame.
