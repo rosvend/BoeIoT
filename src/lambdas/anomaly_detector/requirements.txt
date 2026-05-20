@@ -1,0 +1,6 @@
+# Intentionally empty.
+#
+# boto3 / botocore are provided by the Lambda Python 3.12 runtime, so the zip
+# stays small. If we later swap ThresholdDetector for an sklearn/ONNX model,
+# pin those libs here and have the build step `pip install -r requirements.txt
+# --target .` inside the package directory before Terraform zips it.

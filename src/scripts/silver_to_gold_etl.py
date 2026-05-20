@@ -3,14 +3,63 @@
 ``compute_gold(df)`` is exposed as a pure function so the dashboard notebook
 can compute Gold inline when LocalStack is not available.
 
-Run as a script to materialise Gold to the S3 Gold bucket (and a local cache).
+Run as a script to materialise Gold to the S3 Gold bucket (and a local cache),
+plus publish the anomaly-threshold artifact consumed by the hot-path Lambda
+(see ``src/lambdas/anomaly_detector/config.py``).
 """
 
+import json
 import logging
+from datetime import datetime, timezone
 
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Where the hot-path Lambda reads thresholds from. Kept in sync with
+# ``anomaly_pipeline.tf`` (THRESHOLDS_BUCKET / THRESHOLDS_KEY env vars).
+THRESHOLDS_KEY = "artifacts/anomaly_thresholds.json"
+
+
+def _compute_thresholds(df: pd.DataFrame) -> dict[str, float]:
+    """Return the four percentile anomaly thresholds computed from Silver.
+
+    Single source of truth used by both ``compute_gold`` (for in-place flag
+    columns) and ``_publish_thresholds`` (for the hot-path Lambda artifact).
+    """
+    return {
+        "cht_spread_max": float(df["cht_spread"].quantile(0.95)),
+        "egt_spread_max": float(df["egt_spread"].quantile(0.95)),
+        "oil_press_min":  float(df["E1_OilP"].quantile(0.05)),
+        "oil_temp_max":   float(df["E1_OilT"].quantile(0.95)),
+    }
+
+
+def _publish_thresholds(s3_client, bucket: str, key: str, thresholds: dict[str, float]) -> bool:
+    """Write the thresholds JSON to S3. Returns True on success, False on failure.
+
+    Failure is logged but never raised — the same "best-effort S3, don't break
+    the pipeline" stance taken by ``loaders._try_s3_put``.
+    """
+    body = json.dumps(
+        {
+            "version": 1,
+            "computed_at": datetime.now(timezone.utc).isoformat(),
+            "source": "silver_to_gold_etl._compute_thresholds",
+            "thresholds": thresholds,
+        },
+        indent=2,
+    ).encode("utf-8")
+    try:
+        s3_client.put_object(Bucket=bucket, Key=key, Body=body, ContentType="application/json")
+        logger.info("Thresholds artifact published → s3://%s/%s", bucket, key)
+        return True
+    except Exception as exc:  # pragma: no cover — best-effort publish
+        logger.info(
+            "Thresholds publish failed for s3://%s/%s (%s) — Lambda will use DEFAULT_THRESHOLDS",
+            bucket, key, exc.__class__.__name__,
+        )
+        return False
 
 
 def compute_gold(df: pd.DataFrame) -> pd.DataFrame:
@@ -32,20 +81,18 @@ def compute_gold(df: pd.DataFrame) -> pd.DataFrame:
     if "seq_idx" in df.columns:
         df = df.sort_values(["flight_id", "seq_idx"]).reset_index(drop=True)
 
-    cht_p95 = df["cht_spread"].quantile(0.95)
-    egt_p95 = df["egt_spread"].quantile(0.95)
-    oilp_p05 = df["E1_OilP"].quantile(0.05)
-    oilt_p95 = df["E1_OilT"].quantile(0.95)
+    thresholds = _compute_thresholds(df)
     logger.info(
         "Anomaly thresholds — cht_spread>%.3f, egt_spread>%.3f, "
         "E1_OilP<%.3f, E1_OilT>%.3f",
-        cht_p95, egt_p95, oilp_p05, oilt_p95,
+        thresholds["cht_spread_max"], thresholds["egt_spread_max"],
+        thresholds["oil_press_min"], thresholds["oil_temp_max"],
     )
 
-    df["flag_cht_imbalance"] = df["cht_spread"] > cht_p95
-    df["flag_egt_imbalance"] = df["egt_spread"] > egt_p95
-    df["flag_low_oil_pressure"] = df["E1_OilP"] < oilp_p05
-    df["flag_high_oil_temp"] = df["E1_OilT"] > oilt_p95
+    df["flag_cht_imbalance"] = df["cht_spread"] > thresholds["cht_spread_max"]
+    df["flag_egt_imbalance"] = df["egt_spread"] > thresholds["egt_spread_max"]
+    df["flag_low_oil_pressure"] = df["E1_OilP"] < thresholds["oil_press_min"]
+    df["flag_high_oil_temp"] = df["E1_OilT"] > thresholds["oil_temp_max"]
 
     agg = df.groupby("flight_id").agg(
         flight_duration_sec=("flight_duration_sec", "first"),
@@ -149,7 +196,10 @@ def compute_gold(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    from loaders import GOLD_BUCKET, GOLD_KEY, LOCAL_GOLD, _cache_locally, _try_s3_put, load_silver
+    from loaders import (
+        GOLD_BUCKET, GOLD_KEY, LOCAL_GOLD, SILVER_BUCKET,
+        _cache_locally, _s3_client, _try_s3_put, load_silver,
+    )
 
     silver_df, src = load_silver()
     logger.info(
@@ -167,6 +217,10 @@ def main():
         logger.info("Gold uploaded → s3://%s/%s", GOLD_BUCKET, GOLD_KEY)
     else:
         logger.info("S3 upload skipped (LocalStack down). Local cache is the source of truth.")
+
+    # Publish thresholds for the hot-path Lambda. Best-effort: if S3/LocalStack
+    # is down the Lambda will simply fall back to DEFAULT_THRESHOLDS.
+    _publish_thresholds(_s3_client(), SILVER_BUCKET, THRESHOLDS_KEY, _compute_thresholds(silver_df))
 
     logger.info(
         "Health score stats: min=%.1f, mean=%.1f, max=%.1f",
