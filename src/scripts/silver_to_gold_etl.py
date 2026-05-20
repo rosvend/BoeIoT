@@ -25,6 +25,13 @@ def compute_gold(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
+    # fuel_consumed = first_row - last_row per flight, so the per-flight
+    # row order must be chronological. Silver materialises seq_idx; when
+    # present, sort by it to guarantee the result is independent of how the
+    # Parquet was read.
+    if "seq_idx" in df.columns:
+        df = df.sort_values(["flight_id", "seq_idx"]).reset_index(drop=True)
+
     cht_p95 = df["cht_spread"].quantile(0.95)
     egt_p95 = df["egt_spread"].quantile(0.95)
     oilp_p05 = df["E1_OilP"].quantile(0.05)
