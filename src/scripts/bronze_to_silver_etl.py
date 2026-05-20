@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 logger.info("Initializing ETL: Bronze -> Silver (EDA-guided transformations)")
 
 # ── INFRASTRUCTURE ────────────────────────────────────────────────────────────
+# Env-driven config so the same script runs against LocalStack and real AWS.
+# Local dev: export AWS_ENDPOINT_URL=http://localhost:4566 and
+# AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY=test. On AWS (Glue) leave
+# AWS_ENDPOINT_URL unset; boto3 falls back to the IAM role from mock_service_role.
 s3 = boto3.client(
     "s3",
     endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),

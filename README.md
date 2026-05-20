@@ -175,6 +175,7 @@ uv run jupyter notebook notebooks/dashboard_maintenance.ipynb
 ```bash
 uv run jupyter notebook notebooks/Eda_boeing.ipynb
 ```
+Schema, KPI definitions and the engine health score formula are documented in [`docs/gold_to_dashboard.md`](docs/gold_to_dashboard.md).
 
 Contiene: análisis de distribuciones por sensor, detección de outliers, correlaciones, visualización de fases de vuelo y validación de las transformaciones Silver.
 

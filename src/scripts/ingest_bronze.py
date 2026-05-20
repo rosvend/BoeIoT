@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting ingestion to bronze layer...")
 
+# Env-driven config: works against LocalStack when AWS_ENDPOINT_URL is set
+# (and AWS_ACCESS_KEY_ID/SECRET picked up from env by boto3); on real AWS
+# leave AWS_ENDPOINT_URL unset and the SDK uses the IAM role (Glue runtime).
 s3 = boto3.client(
     "s3",
     endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),
