@@ -1,20 +1,24 @@
+import os
 import pandas as pd
 import numpy as np
-import io 
+import io
+import sys
 import boto3
 import logging
+from botocore.exceptions import ClientError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info("Starting ingestion to bronze layer...")
 
+# Env-driven config: works against LocalStack when AWS_ENDPOINT_URL is set
+# (and AWS_ACCESS_KEY_ID/SECRET picked up from env by boto3); on real AWS
+# leave AWS_ENDPOINT_URL unset and the SDK uses the IAM role (Glue runtime).
 s3 = boto3.client(
-    's3', 
-    endpoint_url='http://localhost:4566', 
-    aws_access_key_id='test', 
-    aws_secret_access_key='test', 
-    region_name='us-east-1'
+    "s3",
+    endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),
+    region_name=os.environ.get("AWS_REGION", "us-east-1"),
 )
 bronze_bucket = "dos-boeing-737-max-bronze-layer"
 
@@ -23,9 +27,9 @@ path = "/home/rosvend/.cache/kagglehub/datasets/hooong/aviation-maintenance-data
 data_dict = pd.read_pickle(path)
 
 sensor_cols = [
-    'volt1', 'volt2', 'amp1', 'amp2', 'FQtyL', 'FQtyR', 'E1_FFlow', 
-    'E1_OilT', 'E1_OilP', 'E1_RPM', 'E1_CHT1', 'E1_CHT2', 'E1_CHT3', 
-    'E1_CHT4', 'E1_EGT1', 'E1_EGT2', 'E1_EGT3', 'E1_EGT4', 'OAT', 
+    'volt1', 'volt2', 'amp1', 'amp2', 'FQtyL', 'FQtyR', 'E1_FFlow',
+    'E1_OilT', 'E1_OilP', 'E1_RPM', 'E1_CHT1', 'E1_CHT2', 'E1_CHT3',
+    'E1_CHT4', 'E1_EGT1', 'E1_EGT2', 'E1_EGT3', 'E1_EGT4', 'OAT',
     'IAS', 'VSpd', 'NormAc', 'AltMSL'
 ]
 
@@ -39,19 +43,27 @@ for v_id in vuelos_ids:
         raw_data = raw_data.T
     df_vuelo = pd.DataFrame(raw_data, columns=sensor_cols)
     df_vuelo['flight_id'] = v_id
+    # seq_idx: chronological position of each row within the flight.
+    # The pickle preserves the order; we materialize it so downstream ETLs
+    # (Silver) can re-sort deterministically before order-dependent ops
+    # (ffill/bfill, diff, rolling).
+    df_vuelo['seq_idx'] = range(len(df_vuelo))
     lista_dfs.append(df_vuelo)
 
 df_raw = pd.concat(lista_dfs, ignore_index=True)
 
-# 3. Save as Parquet and upload to S3 directly from memory
+# Save as Parquet and upload to S3 directly from memory
 parquet_buffer = io.BytesIO()
 df_raw.to_parquet(parquet_buffer, index=False)
-s3.put_object(Bucket=bronze_bucket, Key='raw/flight_data.parquet', Body=parquet_buffer.getvalue())
+
+try:
+    s3.put_object(
+        Bucket=bronze_bucket,
+        Key='raw/flight_data.parquet',
+        Body=parquet_buffer.getvalue(),
+    )
+except ClientError as e:
+    logger.error(f"S3 upload failed for s3://{bronze_bucket}/raw/flight_data.parquet: {e}")
+    sys.exit(1)
 
 logger.info(f"Success! Uploaded {len(df_raw)} records to s3://{bronze_bucket}/raw/flight_data.parquet")
-sensor_cols = [
-    'volt1', 'volt2', 'amp1', 'amp2', 'FQtyL', 'FQtyR', 'E1_FFlow', 
-    'E1_OilT', 'E1_OilP', 'E1_RPM', 'E1_CHT1', 'E1_CHT2', 'E1_CHT3', 
-    'E1_CHT4', 'E1_EGT1', 'E1_EGT2', 'E1_EGT3', 'E1_EGT4', 'OAT', 
-    'IAS', 'VSpd', 'NormAc', 'AltMSL'
-]
