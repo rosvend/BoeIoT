@@ -77,23 +77,9 @@ resource "aws_sagemaker_notebook_instance" "notebook_instance" {
 }
 
 
-#hot path
-
-data "archive_file" "dummy_lambda" {
-  type        = "zip"
-  output_path = "${path.module}/dummy_lambda.zip"
-  source {
-    content  = "def handler(event, context):\n    print('Hello from Boeing Hot Path')\n    return 200"
-    filename = "index.py"
-  }
-}
-
-resource "aws_lambda_function" "hot_path_lambda" {
-    function_name    = "boeing_hot_path_alert"
-    role             = aws_iam_role.mock_service_role.arn
-    handler          = "index.handler"
-    runtime          = "python3.8"
-    filename         = data.archive_file.dummy_lambda.output_path
-    source_code_hash = data.archive_file.dummy_lambda.output_base64sha256
-}
+# Hot path (real-time anomaly pipeline) — see anomaly_pipeline.tf
+# The previous placeholder Lambda (boeing_hot_path_alert) has been replaced
+# by a Kinesis-triggered detector that publishes to SNS. The mock_service_role
+# above already permits lambda.amazonaws.com to AssumeRole; the inline
+# permissions policy for the new Lambda lives in anomaly_pipeline.tf.
 

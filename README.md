@@ -84,4 +84,20 @@ uv run jupyter notebook src/notebooks/dashboard_maintenance.ipynb
 ```
 Schema, KPI definitions and the engine health score formula are documented in [`docs/gold_to_dashboard.md`](docs/gold_to_dashboard.md).
 
+### 5. Hot-path anomaly pipeline (Kinesis → Lambda → SNS)
+A streaming complement to the batch Medallion stack: telemetry frames flow through Kinesis, a Lambda runs a pluggable detector (threshold-based by default, swappable for an ONNX/sklearn model), and anomalies fan out via SNS to an SQS queue you can poll deterministically.
+
+```bash
+# Terminal A — start the consumer
+uv run src/scripts/consume_alerts.py
+
+# Terminal B — force one anomaly type every frame
+uv run src/scripts/produce_telemetry.py --inject-anomaly oil_temp --count 5
+```
+
+Full walkthrough, payload schema, and the data-driven thresholds artifact (written by `silver_to_gold_etl.py`) are in [`docs/hot_path.md`](docs/hot_path.md). Unit tests:
+```bash
+uv sync && uv run pytest -v
+```
+
 ---

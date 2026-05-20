@@ -13,3 +13,14 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+# Put the Lambda package on sys.path so tests can do `from detector import ...`
+# using the same import path as the Lambda runtime sees inside its zip.
+pythonpath = ["src/lambdas/anomaly_detector", "src/scripts"]
+testpaths = ["tests"]

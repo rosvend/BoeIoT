@@ -227,5 +227,9 @@ __marimo__/
 *tfvars
 .terraform.tfstate.lock.info
 
+# Lambda packages built by terraform's archive_file data source
+src/infrastructure/lambda_anomaly_detector.zip
+src/infrastructure/dummy_lambda.zip
+
 # Claude context/settings
 .claude/
