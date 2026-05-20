@@ -7,6 +7,7 @@ S3 fetch and reading from there afterwards.
 
 import io
 import logging
+import os
 from pathlib import Path
 
 import boto3
@@ -27,22 +28,36 @@ LOCAL_GOLD = PROJECT_ROOT / "data" / "gold" / "flight_summary.parquet"
 
 
 def _s3_client():
+    """Env-driven S3 client.
+
+    Honours ``AWS_ENDPOINT_URL`` for LocalStack and lets boto3 resolve creds
+    from env / IAM role for real AWS. Same client shape as the ETL scripts.
+    """
     return boto3.client(
         "s3",
-        endpoint_url="http://localhost:4566",
-        aws_access_key_id="test",
-        aws_secret_access_key="test",
-        region_name="us-east-1",
+        endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),
+        region_name=os.environ.get("AWS_REGION", "us-east-1"),
     )
 
 
 def _try_s3_get(bucket: str, key: str) -> pd.DataFrame | None:
+    """Fetch a parquet from S3, returning ``None`` on any failure.
+
+    Network/permission failures and corrupt-parquet failures are handled in
+    two separate guards so a malformed object does not bypass the local-cache
+    fallback.
+    """
     try:
         s3 = _s3_client()
         obj = s3.get_object(Bucket=bucket, Key=key)
-        return pd.read_parquet(io.BytesIO(obj["Body"].read()))
+        payload = obj["Body"].read()
     except (BotoCoreError, ClientError, OSError) as exc:
         logger.info("S3 unavailable for s3://%s/%s (%s)", bucket, key, exc.__class__.__name__)
+        return None
+    try:
+        return pd.read_parquet(io.BytesIO(payload))
+    except Exception as exc:  # pragma: no cover — defensive, parquet/pyarrow errors
+        logger.info("Invalid parquet at s3://%s/%s (%s)", bucket, key, exc.__class__.__name__)
         return None
 
 

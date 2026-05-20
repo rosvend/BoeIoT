@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import io
@@ -12,11 +13,9 @@ logger = logging.getLogger(__name__)
 logger.info("Starting ingestion to bronze layer...")
 
 s3 = boto3.client(
-    's3',
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id='test',
-    aws_secret_access_key='test',
-    region_name='us-east-1'
+    "s3",
+    endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),
+    region_name=os.environ.get("AWS_REGION", "us-east-1"),
 )
 bronze_bucket = "dos-boeing-737-max-bronze-layer"
 

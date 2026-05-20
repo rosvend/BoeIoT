@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import sys
@@ -14,15 +15,10 @@ logger = logging.getLogger(__name__)
 logger.info("Initializing ETL: Bronze -> Silver (EDA-guided transformations)")
 
 # ── INFRASTRUCTURE ────────────────────────────────────────────────────────────
-# LocalStack-only configuration. The credentials and endpoint MUST match
-# ingest_bronze.py exactly. If we ever migrate to real AWS, both scripts
-# need to be updated together.
 s3 = boto3.client(
-    's3',
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id='test',
-    aws_secret_access_key='test',
-    region_name='us-east-1'
+    "s3",
+    endpoint_url=os.environ.get("AWS_ENDPOINT_URL"),
+    region_name=os.environ.get("AWS_REGION", "us-east-1"),
 )
 
 bronze_bucket = "dos-boeing-737-max-bronze-layer"
@@ -194,9 +190,24 @@ try:
     logger.info(f"Attempting to load existing scaler from s3://{silver_bucket}/{scaler_key}")
     scaler_response = s3.get_object(Bucket=silver_bucket, Key=scaler_key)
     scaler = joblib.load(io.BytesIO(scaler_response['Body'].read()))
-    df_clean[scale_cols] = scaler.transform(df_clean[scale_cols])
-    persist_scaler = False
-    logger.info("Existing scaler loaded — applied transform() for cross-run consistency.")
+    # Schema-drift guard: if Bronze grew/shrunk a sensor since the persisted
+    # scaler was fit, transform() raises ValueError on the column count or
+    # ordering mismatch. Detect via feature_names_in_ and refit instead of
+    # letting the run abort halfway.
+    fitted_features = list(getattr(scaler, "feature_names_in_", []))
+    if fitted_features and fitted_features != scale_cols:
+        logger.warning(
+            "Schema drift detected — persisted scaler features %s != current "
+            "scale_cols %s. Fitting a fresh MinMaxScaler.",
+            fitted_features, scale_cols,
+        )
+        scaler = MinMaxScaler()
+        df_clean[scale_cols] = scaler.fit_transform(df_clean[scale_cols])
+        persist_scaler = True
+    else:
+        df_clean[scale_cols] = scaler.transform(df_clean[scale_cols])
+        persist_scaler = False
+        logger.info("Existing scaler loaded — applied transform() for cross-run consistency.")
 except s3.exceptions.NoSuchKey:
     logger.info("No persisted scaler found — fitting a new MinMaxScaler (cold start).")
     scaler = MinMaxScaler()

@@ -121,7 +121,17 @@ source .venv/bin/activate   # Linux/Mac
 
 ### 3. Ejecutar el pipeline ETL
 
-Los tres scripts deben correrse en orden:
+Los clientes S3 en `ingest_bronze.py`, `bronze_to_silver_etl.py` y `loaders.py` se configuran por variables de entorno, de modo que el mismo código funciona contra LocalStack y AWS real. Para ejecuciones locales exporta:
+
+```bash
+export AWS_ENDPOINT_URL=http://localhost:4566
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+```
+
+En AWS (p. ej. Glue) deja `AWS_ENDPOINT_URL` sin definir — el SDK usa el rol IAM.
+
+Con la infraestructura levantada y el entorno activo, ejecuta los pipelines en orden:
 
 ```bash
 # Capa Bronze: descarga y carga datos crudos desde Kaggle (NGAFID dataset)
