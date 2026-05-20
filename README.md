@@ -63,6 +63,16 @@ uv run src/scripts/ingest_bronze.py
 
 # 2. Clean and consolidate data into the Silver layer
 uv run src/scripts/bronze_to_silver_etl.py
+
+# 3. Aggregate per-flight KPIs into the Gold layer
+uv run src/scripts/silver_to_gold_etl.py
 ```
+
+### 4. Maintenance dashboard
+The Jupyter dashboard reads the Gold layer with a three-stage fallback (S3 → `data/gold/` local cache → inline compute from Silver), so it runs even with LocalStack down:
+```bash
+uv run jupyter notebook src/notebooks/dashboard_maintenance.ipynb
+```
+Schema, KPI definitions and the engine health score formula are documented in [`docs/gold_to_dashboard.md`](docs/gold_to_dashboard.md).
 
 ---
