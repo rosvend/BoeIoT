@@ -12,8 +12,8 @@ import json
 import pytest
 from botocore.exceptions import ClientError
 
-import config
-from detector import DEFAULT_THRESHOLDS, ThresholdDetector
+import src.lambdas.anomalies.config as config
+from src.lambdas.anomalies.detector import DEFAULT_THRESHOLDS, ThresholdDetector
 
 
 class _FakeS3:

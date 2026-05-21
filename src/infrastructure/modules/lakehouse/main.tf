@@ -80,9 +80,12 @@ resource "aws_athena_database" "athena_db" {
   bucket = aws_s3_bucket.athena_results.id
 }
 
-resource "aws_sagemaker_notebook_instance" "notebook_instance" {
-  name          = "${var.project_name}-notebook"
-  instance_type = "ml.t2.medium"
-  role_arn      = aws_iam_role.mock_service_role.arn
-  tags          = local.common_tags
-}
+# NOTE: SageMaker notebook temporarily disabled for the short AWS demo.
+# It is the only continuously-billing resource (~$0.0464/hr) and adds ~5 min
+# to deploy / teardown. Re-enable for the full LocalStack stack.
+# resource "aws_sagemaker_notebook_instance" "notebook_instance" {
+#   name          = "${var.project_name}-notebook"
+#   instance_type = "ml.t2.medium"
+#   role_arn      = aws_iam_role.mock_service_role.arn
+#   tags          = local.common_tags
+# }

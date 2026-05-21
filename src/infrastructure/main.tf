@@ -21,6 +21,6 @@ module "anomaly_detector" {
   mock_service_role_id  = module.medallion_lakehouse.mock_service_role_id
   mock_service_role_arn = module.medallion_lakehouse.mock_service_role_arn
 
-  lambda_source_dir    = "${path.root}/../lambdas/anomaly_detector"
+  lambda_source_dir    = "${path.root}/../lambdas/anomalies"
   lambda_artifact_path = "${path.root}/lambda_anomaly_detector.zip"
 }

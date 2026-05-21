@@ -7,7 +7,7 @@ end-to-end demo in ``docs/hot_path.md``.
 
 from __future__ import annotations
 
-from detector import DEFAULT_THRESHOLDS, ThresholdDetector
+from src.lambdas.anomalies.detector import DEFAULT_THRESHOLDS, ThresholdDetector
 
 
 def _healthy_frame() -> dict:

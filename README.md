@@ -1,111 +1,47 @@
-# BoeIoT — Plataforma de Analítica IoT para Mantenimiento Predictivo de Aeronaves
+# BoeIoT — IoT Analytics platform for airplane predictive maintenance
 
-**BoeIoT** es una solución de analítica de extremo a extremo que procesa telemetría de sensores de aeronaves para detectar anomalías y predecir fallos de componentes. Implementa una arquitectura Medallion (Bronze → Silver → Gold) sobre AWS, combinando procesamiento batch con dashboards interactivos por capa.
-
-El caso de negocio parte de los incidentes documentados en la línea Boeing 737 MAX: sustituir controles de calidad reactivos por un sistema predictivo basado en datos de sensores IoT, habilitando mantenimiento proactivo, reducción de downtime y trazabilidad auditable ante organismos reguladores (FAA/EASA).
+**BoeIoT** is an end-to-end analytics solution that processes aircraft sensor telemetry to detect anomalies and predict component failures. It implements a Medallion architecture (Bronze → Silver → Gold) on AWS, combining batch processing with interactive per-layer dashboards.
 
 ---
 
-## Estructura del repositorio
+## Data architecture
 
-```
-BoeIoT/
-├── notebooks/                    # Análisis exploratorio y dashboard interactivo
-│   ├── Eda_boeing.ipynb          # EDA: limpieza, distribuciones, correlaciones, detección de anomalías
-│   └── dashboard_maintenance.ipynb  # Dashboard operativo por vuelo (Gold layer)
-│
-├── documentacion/                # Estrategia, procesos, arquitectura y gobernanza
-│   ├── estrategia-corporativa.md # Balanced Scorecard, roadmap 12 meses, gestión de riesgos
-│   ├── gold_to_dashboard.md      # Esquema Gold: 35 KPIs, fórmula Engine Health Score
-│   ├── Boeing_Estrategia_Digital.pptx
-│   ├── BoeIoT_Gobierno_de_Datos.docx
-│   ├── As_is_boeing.drawio       # Diagrama estado actual de procesos Boeing
-│   ├── BPM-Proceso-Manufactura-Boeing.drawio
-│   └── DOS - AWS Data architecture.drawio
-│
-├── dashboard/                    # Dashboards HTML pre-generados (Plotly, autónomos)
-│   ├── index.html                # Índice de navegación entre capas
-│   ├── bronze.html               # Métricas capa Bronze: cobertura de sensores, nulls
-│   ├── silver.html               # Métricas capa Silver: outliers, normalización
-│   └── gold.html                 # KPIs por vuelo: health score, anomalías, consumo
-│
-├── img/                          # Diagramas de arquitectura exportados
-│   ├── DOS - AWS Data architecture.jpg
-│   ├── As_is_boeing.drawio.png
-│   └── Lluvia de ideas.png
-│
-├── src/
-│   ├── scripts/                  # Pipeline ETL completo
-│   │   ├── ingest_bronze.py      # Descarga y carga de datos crudos (NGAFID Kaggle)
-│   │   ├── bronze_to_silver_etl.py  # Limpieza, normalización, feature engineering
-│   │   ├── silver_to_gold_etl.py    # Agregación por vuelo: 35 KPIs
-│   │   ├── build_dashboards.py   # Genera dashboard/bronze|silver|gold.html
-│   │   └── loaders.py            # Carga con fallback: S3 → caché local → cómputo inline
-│   └── infrastructure/           # Infraestructura como código (Terraform + LocalStack)
-│       ├── providers.tf          # Configuración global (targets LocalStack)
-│       ├── main.tf               # Orquestador raíz que invoca los módulos
-│       ├── variables.tf          # Parámetros de entrada raíz
-│       ├── outputs.tf            # Agregado de outputs raíz
-│       └── modules/
-│           ├── lakehouse/        # Capa de almacenamiento (S3, Glue, Athena, SageMaker, IAM)
-│           └── anomalies/        # Capa de streaming (Kinesis, Lambda, SNS, SQS)
-│
-├── README.md
-├── pyproject.toml
-└── uv.lock
-```
+![AWS architecture](docs/img/DOS%20-%20AWS%20Data%20architecture.drawio.png)
+
+The project implements the **Medallion Architecture** pattern over an S3 Data Lake:
+
+| Layer | Script | Description |
+|-------|--------|-------------|
+| **Bronze (Raw)** | `ingest_bronze.py` | Ingests raw data from the NGAFID dataset (50 flights, ~23 sensors, 1 Hz sampling). No transformations: preserves the original state. |
+| **Silver (Validated)** | `bronze_to_silver_etl.py` | Deduplication, clipping of physically impossible values, forward/backward fill imputation for systemic nulls, collapse of redundant sensors (CHT/EGT), per-sensor MinMax normalization. |
+| **Gold (Enriched)** | `silver_to_gold_etl.py` | Aggregates at flight level: 35 KPIs per `flight_id` including Engine Health Score (0–100), anomaly counts, fuel consumption, flight-phase distribution, and oil temperature/pressure statistics. |
+
+The **Engine Health Score** combines: detected anomalies (30%), CHT cylinder spread (25%), oil temperature (20%), oil pressure (15%), and sensor availability (10%).
+
+Anomaly thresholds are computed per global percentile (high p95 / low p05), capturing the most extreme 5% of readings per sensor.
+
+A streaming complement to the batch stack, the **hot-path anomaly pipeline** routes telemetry frames through Kinesis, where a Lambda runs a pluggable detector (threshold-based by default, swappable for an ONNX/sklearn model) and fans anomalies out via SNS to an SQS queue.
 
 ---
 
-## Arquitectura de datos
+## Quick start
 
-![Arquitectura AWS](docs/img/DOS%20-%20AWS%20Data%20architecture.jpg)
+### Requirements
 
-El proyecto implementa el patrón **Medallion Architecture** sobre un Data Lake en S3:
-
-| Capa | Script | Descripción |
-|------|--------|-------------|
-| **Bronze (Raw)** | `ingest_bronze.py` | Ingesta datos crudos del dataset NGAFID (50 vuelos, ~23 sensores, frecuencia 1 Hz). Sin transformaciones: preserva estado original. |
-| **Silver (Validated)** | `bronze_to_silver_etl.py` | Deduplicación, clipping de valores físicamente imposibles, imputación forward/backward fill para nulos sistémicos, colapso de sensores redundantes (CHT/EGT), normalización MinMax por sensor. |
-| **Gold (Enriched)** | `silver_to_gold_etl.py` | Agrega a nivel vuelo: 35 KPIs por `flight_id` incluyendo Engine Health Score (0–100), conteo de anomalías, consumo de combustible, distribución de fases de vuelo, estadísticas de temperatura y presión de aceite. |
-
-El **Engine Health Score** combina: anomalías detectadas (30 %), dispersión entre cilindros CHT (25 %), temperatura de aceite (20 %), presión de aceite (15 %) y disponibilidad de sensores (10 %).
-
-Los umbrales de anomalía se calculan por percentil global (p95 alto / p05 bajo), capturando el 5 % de lecturas más extremas por sensor.
-
----
-
-## Stack tecnológico
-
-| Categoría | Herramientas |
-|-----------|-------------|
-| Lenguaje | Python 3.12+ |
-| Infraestructura | Terraform, LocalStack (mock AWS local) |
-| Procesamiento de datos | Pandas, PyArrow, Scikit-learn |
-| Visualización | Plotly, Matplotlib, Seaborn |
-| Cloud SDK | Boto3 |
-| Gestión de entorno | [uv](https://github.com/astral-sh/uv) |
-
----
-
-## Cómo ejecutar el proyecto
-
-### Prerrequisitos
-
-- [Docker](https://www.docker.com/) (para LocalStack)
+- [Docker](https://www.docker.com/)
 - [LocalStack CLI](https://github.com/localstack/localstack) (`pip install localstack`)
 - [Terraform](https://www.terraform.io/) >= 1.0
-- Python 3.12+ y [uv](https://github.com/astral-sh/uv)
+- Python 3.12+ and [uv](https://github.com/astral-sh/uv)
 
-### 1. Levantar la infraestructura local
+### 1. Bring up the local infrastructure
 
-Inicia LocalStack para simular los servicios AWS (S3, Glue, Athena, Lambda):
+Start LocalStack to simulate AWS services (S3, Glue, Athena, Lambda):
 
 ```bash
 localstack start
 ```
 
-Provisiona los recursos con Terraform:
+Provision the resources with Terraform:
 
 ```bash
 cd src/infrastructure
@@ -114,17 +50,15 @@ terraform apply -auto-approve
 cd ../..
 ```
 
-### 2. Configurar el entorno Python
+### 2. Set up the Python environment
 
 ```bash
 uv sync
-source .venv/bin/activate   # Linux/Mac
-# .venv\Scripts\activate    # Windows
 ```
 
-### 3. Ejecutar el pipeline ETL
+### 3. Run the ETL pipeline
 
-Los clientes S3 en `ingest_bronze.py`, `bronze_to_silver_etl.py` y `loaders.py` se configuran por variables de entorno, de modo que el mismo código funciona contra LocalStack y AWS real. Para ejecuciones locales exporta:
+The S3 clients in `ingest_bronze.py`, `bronze_to_silver_etl.py` and `loaders.py` are configured through environment variables, so the same code works against LocalStack and real AWS. For local runs, export:
 
 ```bash
 export AWS_ENDPOINT_URL=http://localhost:4566
@@ -132,56 +66,22 @@ export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 ```
 
-En AWS (p. ej. Glue) deja `AWS_ENDPOINT_URL` sin definir — el SDK usa el rol IAM.
+On AWS (e.g. Glue) leave `AWS_ENDPOINT_URL` unset — the SDK uses the IAM role.
 
-Con la infraestructura levantada y el entorno activo, ejecuta los pipelines en orden:
+With the infrastructure up and the environment ready, run the pipelines in order:
 
 ```bash
-# Capa Bronze: descarga y carga datos crudos desde Kaggle (NGAFID dataset)
+# Bronze layer: download and load raw data from Kaggle (NGAFID dataset)
 uv run src/scripts/ingest_bronze.py
 
-# Capa Silver: limpieza, normalización y feature engineering
+# Silver layer: cleaning, normalization and feature engineering
 uv run src/scripts/bronze_to_silver_etl.py
 
-# Capa Gold: agregación por vuelo y cálculo de KPIs
+# Gold layer: per-flight aggregation and KPI computation
 uv run src/scripts/silver_to_gold_etl.py
 ```
 
-### 4. Ver los dashboards
-
-**Opción A — Dashboards HTML pre-generados** (no requiere infraestructura):
-
-Abre directamente en el navegador:
-
-```
-dashboard/index.html
-```
-
-**Opción B — Regenerar dashboards desde los datos actuales**:
-
-```bash
-uv run src/scripts/build_dashboards.py
-```
-
-Esto sobreescribe los archivos en `dashboard/`.
-
-**Opción C — Dashboard interactivo en Jupyter**:
-
-El notebook lee la capa Gold con fallback en tres etapas: S3 → caché local en `data/gold/` → cómputo inline desde Silver. Funciona incluso sin LocalStack activo.
-
-```bash
-uv run jupyter notebook notebooks/dashboard_maintenance.ipynb
-```
-
-### 5. Explorar el análisis exploratorio
-
-```bash
-uv run jupyter notebook notebooks/Eda_boeing.ipynb
-```
-Schema, KPI definitions and the engine health score formula are documented in [`docs/gold_to_dashboard.md`](docs/gold_to_dashboard.md).
-
-### 5. Hot-path anomaly pipeline (Kinesis → Lambda → SNS)
-A streaming complement to the batch Medallion stack: telemetry frames flow through Kinesis, a Lambda runs a pluggable detector (threshold-based by default, swappable for an ONNX/sklearn model), and anomalies fan out via SNS to an SQS queue you can poll deterministically.
+### 4. Run the hot-path anomaly pipeline (Kinesis → Lambda → SNS)
 
 ```bash
 # Terminal A — start the consumer
@@ -191,18 +91,10 @@ uv run src/scripts/consume_alerts.py
 uv run src/scripts/produce_telemetry.py --inject-anomaly oil_temp --count 5
 ```
 
-Full walkthrough, payload schema, and the data-driven thresholds artifact (written by `silver_to_gold_etl.py`) are in [`docs/hot_path.md`](docs/hot_path.md). Unit tests:
+The full walkthrough, payload schema, and the data-driven thresholds artifact (written by `silver_to_gold_etl.py`) are in [`docs/hot_path.md`](docs/hot_path.md).
+
+Run the unit tests with:
+
 ```bash
 uv sync && uv run pytest -v
 ```
-
----
-
-## Documentación
-
-| Documento | Descripción |
-|-----------|-------------|
-| [`documentacion/estrategia-corporativa.md`](documentacion/estrategia-corporativa.md) | Balanced Scorecard, análisis de alternativas, roadmap de transformación 12 meses y gestión de riesgos (tecnológico, laboral, regulatorio, cultural) |
-| [`documentacion/gold_to_dashboard.md`](documentacion/gold_to_dashboard.md) | Esquema completo de la capa Gold: definición de los 35 KPIs, fórmula del Engine Health Score y guía para extender el dashboard |
-| [`documentacion/BoeIoT_Gobierno_de_Datos.docx`](documentacion/BoeIoT_Gobierno_de_Datos.docx) | Marco de gobernanza de datos: roles, políticas de acceso, linaje y ciclo de vida |
-| [`documentacion/Boeing_Estrategia_Digital.pptx`](documentacion/Boeing_Estrategia_Digital.pptx) | Presentación ejecutiva de la estrategia digital |
