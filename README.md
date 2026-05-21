@@ -42,10 +42,13 @@ BoeIoT/
 │   │   ├── build_dashboards.py   # Genera dashboard/bronze|silver|gold.html
 │   │   └── loaders.py            # Carga con fallback: S3 → caché local → cómputo inline
 │   └── infrastructure/           # Infraestructura como código (Terraform + LocalStack)
-│       ├── main.tf               # S3 buckets Bronze/Silver/Gold, Glue, Athena, Lambda
-│       ├── variables.tf
-│       ├── providers.tf
-│       └── outputs.tf
+│       ├── providers.tf          # Configuración global (targets LocalStack)
+│       ├── main.tf               # Orquestador raíz que invoca los módulos
+│       ├── variables.tf          # Parámetros de entrada raíz
+│       ├── outputs.tf            # Agregado de outputs raíz
+│       └── modules/
+│           ├── lakehouse/        # Capa de almacenamiento (S3, Glue, Athena, SageMaker, IAM)
+│           └── anomalies/        # Capa de streaming (Kinesis, Lambda, SNS, SQS)
 │
 ├── README.md
 ├── pyproject.toml
@@ -56,7 +59,7 @@ BoeIoT/
 
 ## Arquitectura de datos
 
-![Arquitectura AWS](img/DOS%20-%20AWS%20Data%20architecture.jpg)
+![Arquitectura AWS](docs/img/DOS%20-%20AWS%20Data%20architecture.jpg)
 
 El proyecto implementa el patrón **Medallion Architecture** sobre un Data Lake en S3:
 

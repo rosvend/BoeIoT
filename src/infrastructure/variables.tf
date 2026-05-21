@@ -5,18 +5,16 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Deploy environment (ej. local-dev, prod)"
+  description = "Deploy environment (e.g. local-dev, prod)"
   type        = string
   default     = "local-dev"
 }
 
 variable "aws_region" {
-  description = "AWS Region"
+  description = "AWS region"
   type        = string
   default     = "us-east-1"
 }
-
-# ── Hot-path (anomaly pipeline) ──────────────────────────────────────────────
 
 variable "kinesis_shard_count" {
   description = "Shards on the telemetry stream. 1 is plenty for LocalStack demos."
@@ -44,11 +42,11 @@ variable "lambda_batch_window_seconds" {
 
 variable "lambda_endpoint_url_override" {
   description = <<-EOT
-    Optional ``AWS_ENDPOINT_URL`` passed into the Lambda environment. Leave
-    empty for both real AWS *and* the LocalStack Community runtime: LocalStack
+    Optional AWS_ENDPOINT_URL passed into the Lambda environment. Leave empty
+    for both real AWS and the LocalStack Community runtime: LocalStack
     transparently proxies SDK calls back to itself from inside its Lambda
-    sandbox, so no override is needed. Set only if you have a custom
-    LocalStack setup (e.g. ``http://host.docker.internal:4566``).
+    sandbox, so no override is needed. Set only for a custom LocalStack setup
+    (e.g. http://host.docker.internal:4566).
   EOT
   type        = string
   default     = ""
